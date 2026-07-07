@@ -1,5 +1,9 @@
 # grot
 
+[![ci](https://github.com/qf-studio/grot/actions/workflows/ci.yml/badge.svg)](https://github.com/qf-studio/grot/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/qf-studio/grot)](https://github.com/qf-studio/grot/releases)
+[![license](https://img.shields.io/github/license/qf-studio/grot)](LICENSE)
+
 **btop-style terminal dashboards for Prometheus & Grafana.**
 
 grot renders Prometheus metrics as polished terminal dashboards — braille
@@ -143,6 +147,10 @@ make demo    # render the widget gallery
 make test    # go test -race
 make lint    # golangci-lint
 ```
+
+Releases are tag-driven: `make release V=x.y.z` pushes the tag and CI
+(goreleaser) publishes binaries + the Homebrew cask. The README GIF regenerates
+with `vhs docs/demo.tape` (point it at any live Prometheus).
 
 ## Roadmap
 
