@@ -8,16 +8,17 @@ import (
 	"github.com/qf-studio/grot/pkg/tui/theme"
 )
 
-// TimeSeries renders series as a braille area chart with a vertical color
-// gradient (btop style). The legend and current value are embedded in the
-// panel's top border; y-scale labels sit in a left gutter.
+// TimeSeries renders series as a solid block area chart (btop-dense) with a
+// vertical color gradient. Multiple series render as a stacked area. The
+// legend and current values are embedded in the panel's top border; y-scale
+// labels sit in a left gutter. Braille rendering is opt-in (font-dependent).
 type TimeSeries struct {
 	data
 	title    string
 	Unit     string
 	Decimals *int
 	Stacked  bool
-	ASCII    bool // block-character fallback instead of braille
+	Braille  bool // high-res braille dots instead of solid blocks
 }
 
 // NewTimeSeries creates a time-series chart widget.
@@ -66,14 +67,15 @@ func (t *TimeSeries) body(iw, ih int, th theme.Theme) string {
 	}
 
 	var rows []string
-	if t.ASCII {
-		rows = render.BlockChart(vals[0], chartW, ih)
-		st := th.SeriesStyle(0)
-		for i := range rows {
-			rows[i] = st.Render(rows[i])
-		}
-	} else {
+	switch {
+	case t.Braille:
 		rows = render.BrailleMulti(vals, chartW, ih, colors)
+	case len(vals) == 1:
+		gradient := render.GradientStyles([]string{colors[0]}, ih)
+		rows = render.BlockArea(vals[0], chartW, ih, gradient)
+	default:
+		// Multi-series → stacked solid area, one color per series.
+		rows = render.BlockStacked(vals, chartW, ih, colors)
 	}
 
 	lines := make([]string, 0, ih)

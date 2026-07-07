@@ -53,16 +53,18 @@ func (s *Stat) body(iw, ih int, th theme.Theme) string {
 	valueStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color(color))
 	value := valueStyle.Render(FormatValue(v, s.Unit, s.Decimals))
 
-	// With history and room: value on top, braille area filling the rest
-	// (btop-style dense panel). Otherwise: centered value.
+	// With history and room: value on top, subdued solid trend underneath.
+	// The trend is context, not the star — it stays dim so the number reads
+	// first. Otherwise: centered value.
 	if len(ser.Points) > 1 && ih >= 3 {
 		vals := make([]float64, len(ser.Points))
 		for i, p := range ser.Points {
 			vals[i] = p.V
 		}
 		chartRows := ih - 1
-		gradient := render.GradientStyles([]string{render.Dim(color, 0.45), color}, chartRows)
-		rows := render.BrailleArea(vals, iw, chartRows, gradient)
+		gradient := render.GradientStyles(
+			[]string{render.Dim(color, 0.30), render.Dim(color, 0.65)}, chartRows)
+		rows := render.BlockArea(vals, iw, chartRows, gradient)
 		lines := append([]string{render.Center(value, iw)}, rows...)
 		return strings.Join(lines, "\n")
 	}

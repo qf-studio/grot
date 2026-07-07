@@ -64,9 +64,10 @@ func (g *Gauge) body(iw, ih int, th theme.Theme) string {
 	color := thresholdColor(v, g.Thresholds, th, th.Accent)
 	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(color)).Bold(true)
 
-	// Gradient stops follow the threshold colors in value order (btop-style
-	// sweep); no thresholds → dim→bright accent.
-	stops := g.gradientStops(th)
+	// The meter fills in the CURRENT value's threshold color (dim→bright
+	// sweep of that one color). A rainbow sweep would read as "the left part
+	// of my metric is failing" — the color must answer "how is it now?".
+	stops := []string{render.Dim(color, 0.55), color}
 	lines := []string{
 		render.Center(valueStyle.Render(FormatValue(v, g.Unit, g.Decimals)), iw),
 		render.GradientMeter(frac, iw, stops, th.DimMoreStyle()),
@@ -83,17 +84,4 @@ func (g *Gauge) body(iw, ih int, th theme.Theme) string {
 	}
 
 	return vCenter(strings.Join(lines, "\n"), iw, ih)
-}
-
-// gradientStops builds meter gradient stops from thresholds ordered by value
-// (base first). Without thresholds the meter sweeps dim→bright accent.
-func (g *Gauge) gradientStops(th theme.Theme) []string {
-	if len(g.Thresholds) == 0 {
-		return []string{th.Accent}
-	}
-	stops := make([]string, 0, len(g.Thresholds))
-	for _, t := range g.Thresholds {
-		stops = append(stops, th.ResolveColor(t.Color))
-	}
-	return stops
 }
