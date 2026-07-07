@@ -74,6 +74,27 @@ func TestTruncateVisualStyled(t *testing.T) {
 	}
 }
 
+// TestPanelInfoStyledLegendWidths guards the resize-corruption invariant: a
+// styled border legend truncated at any panel width must keep every line at
+// exactly w cells. An over-wide (or escape-mangled) top border wraps in the
+// terminal and cascade-breaks the whole frame below it. Raw ANSI on purpose —
+// lipgloss strips color off-TTY, which would make the sweep vacuous.
+func TestPanelInfoStyledLegendWidths(t *testing.T) {
+	ps := PanelStyle{Border: lipgloss.NewStyle(), Title: lipgloss.NewStyle()}
+	info := "\x1b[38;2;126;184;218m●\x1b[0m \x1b[38;2;139;148;158mcost\x1b[0m \x1b[38;2;201;209;217m$9.78\x1b[0m"
+	for w := 6; w <= 80; w++ {
+		out := PanelInfo("cumulative cost", info, "body", w, 5, ps)
+		if out == "" {
+			continue // below minimum chrome
+		}
+		for i, line := range strings.Split(out, "\n") {
+			if got := lipgloss.Width(line); got != w {
+				t.Fatalf("w=%d line %d: width %d: %q", w, i, got, line)
+			}
+		}
+	}
+}
+
 func TestNormalizeSparkline(t *testing.T) {
 	// Levels are 1-8, right-aligned, zeros pad left.
 	levels := NormalizeSparkline([]float64{0, 5, 10}, 5)
