@@ -57,9 +57,9 @@ func (t *TimeSeries) body(iw, ih int, th theme.Theme) string {
 
 	hiLabel := FormatValue(maxV, t.Unit, t.Decimals)
 	loLabel := FormatValue(minV, t.Unit, t.Decimals)
-	gutter := len(hiLabel)
-	if len(loLabel) > gutter {
-		gutter = len(loLabel)
+	gutter := lipgloss.Width(hiLabel)
+	if w := lipgloss.Width(loLabel); w > gutter {
+		gutter = w
 	}
 	if gutter > iw/3 {
 		gutter = iw / 3
@@ -180,5 +180,3 @@ func (t *TimeSeries) legendInfo(th theme.Theme) string {
 	}
 	return strings.Join(parts, "  ")
 }
-
-var _ = lipgloss.Width // keep lipgloss import if unused in future edits

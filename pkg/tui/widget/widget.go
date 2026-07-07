@@ -112,20 +112,24 @@ func vCenter(content string, iw, ih int) string {
 }
 
 // thresholdColor resolves the color for value v given thresholds: the color
-// of the highest threshold whose Value <= v. Falls back to fallback.
+// of the highest threshold whose Value <= v, regardless of slice order (Grafana
+// exports steps sorted, hand-written YAML may not be). A nil-Value threshold is
+// the base color, used when no numeric threshold matches. Falls back to fallback.
 func thresholdColor(v float64, thresholds []Threshold, th theme.Theme, fallback string) string {
 	color := fallback
-	base := true
+	matched := false
+	bestVal := 0.0
 	for _, t := range thresholds {
 		if t.Value == nil {
-			if base {
+			if !matched {
 				color = th.ResolveColor(t.Color)
 			}
 			continue
 		}
-		if v >= *t.Value {
+		if v >= *t.Value && (!matched || *t.Value >= bestVal) {
+			matched = true
+			bestVal = *t.Value
 			color = th.ResolveColor(t.Color)
-			base = false
 		}
 	}
 	return color

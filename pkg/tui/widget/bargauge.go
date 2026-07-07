@@ -77,8 +77,8 @@ func (b *BarGauge) body(iw, ih int, th theme.Theme) string {
 	}
 	valueW := 0
 	for _, vt := range valueTexts {
-		if len(vt) > valueW {
-			valueW = len(vt)
+		if w := lipgloss.Width(vt); w > valueW {
+			valueW = w
 		}
 	}
 	barW := iw - legendW - valueW - 4 // 2 gaps of 2 spaces

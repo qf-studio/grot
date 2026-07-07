@@ -78,7 +78,7 @@ func (g *Gauge) body(iw, ih int, th theme.Theme) string {
 	if ih >= 4 {
 		lo := FormatValue(g.Min, g.Unit, g.Decimals)
 		hi := FormatValue(g.Max, g.Unit, g.Decimals)
-		gap := iw - len(lo) - len(hi)
+		gap := iw - lipgloss.Width(lo) - lipgloss.Width(hi)
 		if gap > 0 {
 			lines = append(lines, th.DimStyle().Render(lo+strings.Repeat(" ", gap)+hi))
 		}
