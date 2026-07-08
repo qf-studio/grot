@@ -41,12 +41,14 @@ widgets:
       - expr: sum(pilot_execution_cost_usd_total) / (sum(pilot_issues_processed_total) > 0)
 
   - type: stat
-    title: prs / session
+    title: prs merged
     unit: short
     sparkline: true
     grid: { x: 18, y: 0, w: 6, h: 4 }
     queries:
-      # Raw counter = merged this daemon session (counters reset on restart).
+      # Lifetime total since pilot#4029 (counters hydrate from the store on boot).
+      # Currently reads 0: Pilot's PR-metric instrumentation never increments
+      # (reported on the same issue) — the card is correct once that's fixed.
       - expr: sum(pilot_prs_merged_total)
 
   # Row 2 — success gauge + token breakdown bars.
@@ -74,6 +76,8 @@ widgets:
         legend: "{{direction}}"
 
   # Row 3 — always-defined charts: a cumulative cost curve and stacked token rate.
+  # Since pilot#4029 the counter is lifetime (store-hydrated), so the curve is the
+  # true all-time spend, not since-restart.
   - type: timeseries
     title: cumulative cost
     unit: currencyUSD
