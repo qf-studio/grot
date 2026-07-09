@@ -47,20 +47,17 @@ widgets:
       - expr: sum(pilot_execution_cost_usd_total) / (sum(pilot_issues_shipped_total) > 0)
 
   - type: stat
-    title: prs merged (recent)
+    title: prs merged
     unit: short
     sparkline: true
     grid: { x: 18, y: 0, w: 6, h: 4 }
     queries:
-      # NOT lifetime, unlike the other row-1 cards: GH-4093 hydrates this from the
-      # execution_events ledger, which only reaches back to ~2026-07 — the ~1,100+
-      # pre-ledger merges are absent. Drop "(recent)" once Pilot hydrates the full
-      # history.
+      # Lifetime since pilot 2f25dcd0 (hydrates from executions, not the ledger).
       - expr: sum(pilot_prs_merged_total)
 
   # Row 2 — CI pass gauge + token breakdown bars.
   - type: gauge
-    title: ci pass rate (recent)
+    title: pr delivery
     unit: percentunit
     min: 0
     max: 1
@@ -72,10 +69,9 @@ widgets:
       - value: 0.95
         color: green
     queries:
-      # Pilot exports no CI-specific pass/fail counter; PR outcomes are the closest
-      # proxy (pilot_prs_failed_total also counts approval rejections / merge
-      # escalations, not only CI failures). "(recent)": the PR counters cover the
-      # execution_events ledger era (~2026-07 on), not lifetime — see "prs merged".
+      # Lifetime PRs delivered vs failed. Pilot exports no CI-specific pass/fail
+      # counter yet — once pilot#4134 ships pilot_ci_runs_total{result}, repoint
+      # this gauge and retitle it "ci pass rate".
       # `> 0` guards the zero-denominator case: renders "no data", not +Inf.
       - expr: sum(pilot_prs_merged_total) / ((sum(pilot_prs_merged_total) + sum(pilot_prs_failed_total)) > 0)
 
