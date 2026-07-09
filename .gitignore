@@ -7,3 +7,6 @@ coverage.html
 
 # built binary
 /grom
+
+# pre-rename local build
+/grot
